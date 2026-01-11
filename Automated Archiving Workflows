@@ -1,0 +1,14 @@
+#!/bin/bash
+# Terminal script for automated rsync to encrypted drive
+SOURCE_DIR="/home/architect/vault"
+BACKUP_DIR="/mnt/secure_backup"
+
+if mountpoint -q "$BACKUP_DIR"; then
+  # Incremental sync with deletion of removed files
+  rsync -avz --delete "$SOURCE_DIR/" "$BACKUP_DIR/data/"
+  # Generate a timestamped, encrypted legacy payload
+  tar -czf - "$SOURCE_DIR" | gpg -c -o "$BACKUP_DIR/omega_$(date +%Y%m%d).gpg"
+  echo "Legacy Archive Updated Successfully."
+else
+  echo "Error: Secure backup drive not mounted."
+fi
