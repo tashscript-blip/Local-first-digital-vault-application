@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign OS | Integration Monitor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        :root {
+            --blueprint-bg: #0f172a;
+            --blueprint-grid: #1e293b;
+            --terminal-text: #22c55e;
+            --ink-black: #020617;
+        }
+        body { background-color: var(--blueprint-bg); color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .grid-bg {
+            background-image: linear-gradient(var(--blueprint-grid) 1px, transparent 1px),
+                              linear-gradient(90deg, var(--blueprint-grid) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+        }
+        .file-tree-line { border-left: 2px solid #334155; margin-left: 10px; padding-left: 15px; }
+    </style>
+    <!-- 
+        Palette: "Brilliant Blues" 
+        Confirmed: NO SVG, NO Mermaid JS.
+        Focus: Path correction and Layer 3 Integration.
+    -->
+</head>
+<body class="grid-bg min-h-screen p-6 md:p-12">
+
+    <div class="max-w-6xl mx-auto space-y-10">
+        
+        <!-- Header -->
+        <header class="flex justify-between items-end border-b border-slate-700 pb-6">
+            <div>
+                <h1 class="text-4xl font-black tracking-tighter uppercase italic">Sovereign <span class="text-blue-500">Node-01</span></h1>
+                <p class="text-slate-400 font-mono text-sm mt-2">Architecture Path: /home/voidstarseed/legacy-vault-desktop</p>
+            </div>
+            <div class="text-right">
+                <span class="px-3 py-1 bg-red-500/10 text-red-500 border border-red-500/50 rounded-full text-xs font-bold font-mono">DEBUG MODE: ON</span>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Column 1: Directory Health -->
+            <div class="lg:col-span-1 space-y-6">
+                <div class="bg-slate-900/80 p-6 rounded-xl border border-slate-700 backdrop-blur-md">
+                    <h3 class="text-sm font-bold uppercase text-slate-500 mb-6 tracking-widest">Corrected Hierarchy</h3>
+                    <div class="font-mono text-xs space-y-2">
+                        <div class="text-blue-400">~/legacy-vault-desktop/</div>
+                        <div class="file-tree-line">
+                            <div class="text-green-400 italic">package.json (Script: start)</div>
+                            <div class="text-green-400 italic">index.js (Electron Main)</div>
+                            <div class="text-slate-500">node_modules/</div>
+                            <div class="text-blue-400">sovereign-os/</div>
+                            <div class="file-tree-line">
+                                <div class="text-slate-500">01_sovereign_core/</div>
+                                <div class="text-slate-500">02_the_throne/</div>
+                                <div class="text-blue-400">03_money_machines/</div>
+                                <div class="file-tree-line">
+                                    <div class="text-blue-300">project_alpha/</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/80 p-6 rounded-xl border border-slate-700">
+                    <h3 class="text-sm font-bold uppercase text-slate-500 mb-4 tracking-widest">Build Distribution</h3>
+                    <div class="chart-container">
+                        <canvas id="buildChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Column 2 & 3: The Project Alpha Bridge -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-slate-900/80 p-8 rounded-xl border border-slate-700">
+                    <h2 class="text-2xl font-bold mb-4">Bridging Layer 3: Project Alpha</h2>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-6">
+                        Your logs show you initialized <strong>Project Alpha</strong> using `create-react-app`. 
+                        To make this functional within your Sovereign OS shell, you must synchronize the Electron Main process with the React development server.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                        <div class="p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                            <span class="block text-blue-500 font-bold text-xs uppercase mb-1">Terminal 1 (The Engine)</span>
+                            <code class="text-xs text-slate-300">cd sovereign-os/.../project_alpha && npm start</code>
+                        </div>
+                        <div class="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                            <span class="block text-green-500 font-bold text-xs uppercase mb-1">Terminal 2 (The Shell)</span>
+                            <code class="text-xs text-slate-300">cd ~/legacy-vault-desktop && npm start</code>
+                        </div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-slate-300 mb-3 uppercase tracking-tighter">Required Tooltip Config (Chart.js Internal)</h3>
+                    <div class="p-4 bg-black rounded-lg font-mono text-[10px] text-slate-400 overflow-x-auto">
+                        plugins: { tooltip: { callbacks: { title: (items) => items[0].chart.data.labels[items[0].dataIndex].join(' ') } } }
+                    </div>
+                </div>
+
+                <div class="bg-blue-600 p-8 rounded-xl shadow-2xl shadow-blue-500/20">
+                    <h3 class="text-lg font-bold text-white mb-2">The Sovereign Command</h3>
+                    <p class="text-blue-100 text-sm mb-4">Run this to verify the `package.json` fix was applied successfully:</p>
+                    <div class="bg-blue-900/50 p-4 rounded font-mono text-blue-200 text-sm">
+                        grep '"start":' package.json
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Data Distribution Visualization
+        const ctx = document.getElementById('buildChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: [['Core', 'Logic'], ['Financial', 'Entities'], ['Risk', 'Defense']],
+                datasets: [{
+                    data: [40, 35, 25],
+                    backgroundColor: ['#2563eb', '#3b82f6', '#1d4ed8'],
+                    borderColor: '#0f172a',
+                    borderWidth: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 } } },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                let label = tooltipItems[0].chart.data.labels[tooltipItems[0].dataIndex];
+                                return Array.isArray(label) ? label.join(' ') : label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
