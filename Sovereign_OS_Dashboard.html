@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign Operating System | Architect's Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* Chosen Palette: Architect's Paper */
+        :root {
+            --bg-paper: #F5F5F0;
+            --text-ink: #1A1A1A;
+            --accent-blueprint: #2563EB;
+            --accent-alert: #DC2626;
+            --accent-success: #059669;
+            --grid-line: #E5E5E5;
+        }
+        body {
+            background-color: var(--bg-paper);
+            color: var(--text-ink);
+            font-family: 'Inter', sans-serif;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; /* Base height */
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        /* Custom scrollbar for technical feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #E5E5E5;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #525252;
+            border-radius: 4px;
+        }
+        .blueprint-grid {
+            background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
+            linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .layer-card {
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+        .layer-card:hover, .layer-card.active {
+            border-left-color: var(--accent-blueprint);
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .nav-item {
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-item:hover {
+            color: var(--accent-blueprint);
+            background-color: rgba(37, 99, 235, 0.05);
+        }
+        .nav-item.active {
+            border-bottom: 2px solid var(--accent-blueprint);
+            color: var(--accent-blueprint);
+            background-color: white;
+        }
+        .terminal-block {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.25);
+        }
+        .cmd-prompt::before {
+            content: "$ ";
+            color: #059669;
+            font-weight: bold;
+        }
+        .comment {
+            color: #6b7280;
+            font-style: italic;
+        }
+    </style>
+    <!-- Chosen Palette: Architect's Paper (Warm Neutral Background, Ink Text, Blueprint Blue Accent) -->
+
+    <!-- Application Structure Plan:
+         1. Dashboard Header: Status, Phase (Burst/Dormant), and Defcon level.
+         2. Tab Navigation:
+            - "Overview": High-level metrics, System Balance Radar Chart, Freedom Protocol Checklist.
+            - "Architecture": Interactive 5-Layer Stack details.
+            - "Agents": 4 Personas with specific duties and Engine alignment.
+            - "Execution": The technical roadmap (GitHub/Terminal/Code) user requested.
+            - "Vault": Break Glass Protocol status.
+         3. Dynamic Content Area: Updates based on tab selection using vanilla JS.
+         4. Rationale: A dashboard metaphor puts the user in the "Architect" seat (Sovereign Core), reinforcing the philosophy of the source material.
+    -->
+
+    <!-- Visualization & Content Choices:
+         - Chart.js Radar: "System Balance" (Creative vs Financial vs Defense). Goal: Relationship/Balance. Justification: Shows skewed priorities instantly.
+         - Chart.js Doughnut: "Resource Allocation" (Engine A vs B). Goal: Compare. Justification: Visualizes the split between creation and monetization.
+         - HTML/Tailwind Stack: The 5 Layers. Goal: Hierarchy/Organize. Justification: Clear vertical dependency visualization. No SVG needed.
+         - Terminal UI Blocks: For "Execution Blueprint". Goal: Inform/Instruction. Justification: Fits the "Developer/Architect" persona request.
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="min-h-screen flex flex-col blueprint-grid">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold tracking-tight text-gray-900">SOVEREIGN<span class="text-blue-600">OS</span></span>
+                    <span class="ml-4 px-2 py-0.5 rounded text-xs font-mono bg-gray-100 text-gray-600 border border-gray-300">v1.0.4 BUILD</span>
+                </div>
+
+                <!-- Status Indicators -->
+                <div class="hidden md:flex space-x-6">
+                    <div class="flex flex-col items-end">
+                        <span class="text-[10px] uppercase text-gray-500 font-bold tracking-wider">Current Phase</span>
+                        <span class="text-sm font-mono font-bold text-blue-600" id="phase-indicator">STRUCTURING</span>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <span class="text-[10px] uppercase text-gray-500 font-bold tracking-wider">Protocol Status</span>
+                        <span class="text-sm font-mono font-bold text-green-600">ONLINE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-gray-100 bg-gray-50 overflow-x-auto">
+            <div class="flex space-x-1 h-12 items-end text-sm font-medium">
+                <button onclick="switchTab('overview')" class="nav-item active px-4 py-2 rounded-t-lg h-10 flex items-center whitespace-nowrap" id="tab-overview">System Overview</button>
+                <button onclick="switchTab('architecture')" class="nav-item px-4 py-2 rounded-t-lg h-10 flex items-center whitespace-nowrap" id="tab-architecture">The 5-Layer Stack</button>
+                <button onclick="switchTab('agents')" class="nav-item px-4 py-2 rounded-t-lg h-10 flex items-center whitespace-nowrap" id="tab-agents">Agent Command</button>
+                <button onclick="switchTab('execution')" class="nav-item px-4 py-2 rounded-t-lg h-10 flex items-center text-blue-700 whitespace-nowrap bg-blue-50" id="tab-execution">Execution Blueprint</button>
+                <button onclick="switchTab('vault')" class="nav-item px-4 py-2 rounded-t-lg h-10 flex items-center text-red-700 whitespace-nowrap" id="tab-vault">Break Glass Protocol</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- VIEW: OVERVIEW -->
+        <div id="view-overview" class="space-y-8 animate-fade-in">
+            <!-- Intro Paragraph -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h1 class="text-2xl font-bold text-gray-900 mb-2">Architect's Dashboard</h1>
+                <p class="text-gray-600 max-w-4xl leading-relaxed">
+                    Welcome, Architect. This dashboard monitors the <strong>Personal Hybrid Architecture</strong>.
+                    Your primary directive is to maintain the "Two-Engine Design": protecting the Sovereign Core (Creative) from the demands of the Money Machines (Financial).
+                    Use this interface to assess system health, assign agent personas, and execute the technical build of your operating system.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Chart: System Balance -->
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col">
+                    <h3 class="text-sm font-bold uppercase text-gray-500 mb-4 tracking-wider">System Balance & Health</h3>
+                    <div class="chart-container flex-grow">
+                        <canvas id="balanceChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-500 text-center border-t border-gray-100 pt-2">
+                        <strong>Goal:</strong> Maximize "Asset Control" & "Defense" while minimizing "Exposure" & "Labor".
+                    </div>
+                </div>
+
+                <!-- Core Directives Panel -->
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold uppercase text-gray-500 mb-4 tracking-wider">The Freedom Protocol Check</h3>
+                        <p class="text-sm text-gray-600 mb-4">Before approving any new project or "Money Machine," pass it through this filter:</p>
+                        <div class="space-y-4">
+                            <div class="flex items-start p-3 bg-gray-50 rounded border border-gray-100">
+                                <div class="flex-shrink-0 h-6 w-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs mt-0.5">1</div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-bold text-gray-900">Can it be paused?</p>
+                                    <p class="text-xs text-gray-500">If stopping work collapses the system, it is a design flaw.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start p-3 bg-gray-50 rounded border border-gray-100">
+                                <div class="flex-shrink-0 h-6 w-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs mt-0.5">2</div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-bold text-gray-900">Can it be automated?</p>
+                                    <p class="text-xs text-gray-500">Manual labor must be transitional, never permanent.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start p-3 bg-gray-50 rounded border border-gray-100">
+                                <div class="flex-shrink-0 h-6 w-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs mt-0.5">3</div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-bold text-gray-900">Who owns the asset?</p>
+                                    <p class="text-xs text-gray-500">Assets must reside in the Throne, not the Person.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-6 border-t border-gray-100">
+                         <button onclick="switchTab('execution')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-mono text-sm py-4 rounded shadow transition-colors flex justify-center items-center">
+                            INITIATE CONSTRUCTION PROTOCOL
+                            <span class="ml-2 text-xl">&rarr;</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: ARCHITECTURE (5 Layers) -->
+        <div id="view-architecture" class="hidden space-y-6">
+            <!-- Intro -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h2 class="text-xl font-bold text-gray-900">The 5-Layer Architecture</h2>
+                <p class="text-gray-600 text-sm mt-1">
+                    This is the structural hierarchy of your Sovereign OS. The system is designed to isolate risk and maximize control.
+                    Click any layer in the stack below to inspect its operational rules and assets.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Layer Navigation (The Stack) -->
+                <div class="lg:col-span-1 space-y-3" id="layer-list">
+                    <!-- JS generated buttons -->
+                </div>
+
+                <!-- Layer Detail View -->
+                <div class="lg:col-span-2 bg-white p-8 rounded-lg shadow-sm border border-gray-200 min-h-[500px] relative" id="layer-detail-panel">
+                    <!-- Content populated by JS -->
+                    <div class="h-full flex flex-col justify-center items-center text-gray-400">
+                        <span class="text-4xl mb-4">❖</span>
+                        <p>Select a layer to analyze.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: AGENTS -->
+        <div id="view-agents" class="hidden">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8">
+                <h2 class="text-xl font-bold text-gray-900">Specialized Agent Personas</h2>
+                <p class="text-gray-600 text-sm mt-1">
+                    To operate the system, you must switch between specific mental models ("Agents").
+                    <strong>Do not attempt to be all things at once.</strong> Separate "Engine A" (Creative) tasks from "Engine B" (Financial) tasks.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Idea Organizer -->
+                <div class="bg-white border-l-4 border-blue-500 rounded-lg p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-lg text-gray-900">Idea Organizer</h3>
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-mono">ENGINE A</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4 h-12">Tags and connects raw concepts in the Vault. Identifies patterns between disparate inputs.</p>
+                    <div class="bg-gray-50 p-3 rounded text-xs font-mono text-gray-700 border border-gray-200">
+                        <div class="mb-1"><span class="text-blue-600 font-bold">INPUT:</span> Raw Notes, Voice Memos</div>
+                        <div class="mb-1"><span class="text-blue-600 font-bold">OUTPUT:</span> Tagged Ontology, Connections</div>
+                        <div><span class="text-blue-600 font-bold">TOOL:</span> Obsidian / Notion / Vault</div>
+                    </div>
+                </div>
+
+                <!-- Burst Assistant -->
+                <div class="bg-white border-l-4 border-blue-500 rounded-lg p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-lg text-gray-900">Burst Assistant</h3>
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-mono">ENGINE A</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4 h-12">Formats raw output into modular frameworks. Activates during high-energy creative sprints.</p>
+                    <div class="bg-gray-50 p-3 rounded text-xs font-mono text-gray-700 border border-gray-200">
+                        <div class="mb-1"><span class="text-blue-600 font-bold">INPUT:</span> Brain Dumps, Drafts</div>
+                        <div class="mb-1"><span class="text-blue-600 font-bold">OUTPUT:</span> Structured Frameworks, PDFs</div>
+                        <div><span class="text-blue-600 font-bold">TOOL:</span> Markdown Editors, Canvas</div>
+                    </div>
+                </div>
+
+                <!-- Revenue Engine -->
+                <div class="bg-white border-l-4 border-green-500 rounded-lg p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-lg text-gray-900">Revenue Engine</h3>
+                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-mono">ENGINE B</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4 h-12">Suggests monetization paths for curated assets. Strictly separated from creation phase.</p>
+                    <div class="bg-gray-50 p-3 rounded text-xs font-mono text-gray-700 border border-gray-200">
+                        <div class="mb-1"><span class="text-green-600 font-bold">INPUT:</span> Completed Assets</div>
+                        <div class="mb-1"><span class="text-green-600 font-bold">OUTPUT:</span> Offers, Pricing Models, ROI</div>
+                        <div><span class="text-green-600 font-bold">TOOL:</span> Stripe, Excel, Marketing Automation</div>
+                    </div>
+                </div>
+
+                <!-- Defense/Control -->
+                <div class="bg-white border-l-4 border-red-500 rounded-lg p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-lg text-gray-900">Defense/Control</h3>
+                        <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded font-mono">SYSTEM</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-4 h-12">Flags burnout patterns, high "mental load", and identity exposure risks.</p>
+                    <div class="bg-gray-50 p-3 rounded text-xs font-mono text-gray-700 border border-gray-200">
+                        <div class="mb-1"><span class="text-red-600 font-bold">INPUT:</span> Calendar, Bank Logs, Energy Levels</div>
+                        <div class="mb-1"><span class="text-red-600 font-bold">OUTPUT:</span> "Kill" signals, Rest Protocols</div>
+                        <div><span class="text-red-600 font-bold">TOOL:</span> Weekly System Review</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: EXECUTION BLUEPRINT (Technical) -->
+        <div id="view-execution" class="hidden">
+             <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-8 border-l-4 border-l-gray-800">
+                <h2 class="text-xl font-bold text-gray-900">Execution Blueprint: Technical Implementation</h2>
+                <p class="text-gray-600 text-sm mt-2">
+                    This module answers your core question: <em>"How shall I work on it? Use GitHub, use the terminal, use Code."</em>
+                    Follow these four phases to initialize your Sovereign OS using a professional developer workflow (Monorepo approach).
+                </p>
+            </div>
+
+            <div class="relative border-l-2 border-gray-200 ml-4 space-y-12">
+
+                <!-- Phase 1 -->
+                <div class="relative pl-8">
+                    <div class="absolute -left-[9px] top-0 h-4 w-4 rounded-full bg-blue-600 ring-4 ring-white"></div>
+                    <h3 class="text-lg font-bold text-gray-900">Phase 1: The Digital Foundation (Setup)</h3>
+                    <p class="text-sm text-gray-600 mb-4">Create the holding vessel for your system. We use a unified folder structure (Monorepo) to keep all layers distinctive.</p>
+
+                    <div class="terminal-block">
+                        <div class="cmd-prompt">mkdir sovereign-os</div>
+                        <div class="cmd-prompt">cd sovereign-os</div>
+                        <div class="comment"># Initialize Version Control (The Vault Track Record)</div>
+                        <div class="cmd-prompt">git init</div>
+                        <br>
+                        <div class="comment"># Create the 5-Layer Structure</div>
+                        <div class="cmd-prompt">mkdir 01_sovereign_core 02_the_throne 03_money_machines 04_defense_systems 99_vault_encrypted</div>
+                        <br>
+                        <div class="comment"># Create the Manifesto (Your Prime Directive)</div>
+                        <div class="cmd-prompt">touch 01_sovereign_core/prime_directive.md</div>
+                        <div class="cmd-prompt">echo "# Prime Directive: Optionality, Privacy, Control" > 01_sovereign_core/prime_directive.md</div>
+                    </div>
+                </div>
+
+                <!-- Phase 2 -->
+                <div class="relative pl-8">
+                    <div class="absolute -left-[9px] top-0 h-4 w-4 rounded-full bg-gray-300 ring-4 ring-white"></div>
+                    <h3 class="text-lg font-bold text-gray-900">Phase 2: Engine A Configuration (Creative)</h3>
+                    <p class="text-sm text-gray-600 mb-4">Establish the environment for the <strong>Idea Organizer</strong> and <strong>Burst Assistant</strong> using Markdown templates.</p>
+
+                    <div class="bg-white border border-gray-200 p-4 rounded-lg mb-4">
+                        <ul class="list-disc pl-5 space-y-2 text-sm text-gray-700">
+                            <li><strong>Tool:</strong> VS Code + Markdown All in One Extension (or Obsidian linked to `01_sovereign_core`).</li>
+                            <li><strong>Task:</strong> Create a `templates` folder in `01_sovereign_core` for repeatable idea capture.</li>
+                        </ul>
+                    </div>
+
+                    <div class="terminal-block">
+                        <div class="cmd-prompt">mkdir 01_sovereign_core/templates</div>
+                        <div class="cmd-prompt">touch 01_sovereign_core/templates/idea_template.md</div>
+                    </div>
+                </div>
+
+                <!-- Phase 3 -->
+                <div class="relative pl-8">
+                    <div class="absolute -left-[9px] top-0 h-4 w-4 rounded-full bg-gray-300 ring-4 ring-white"></div>
+                    <h3 class="text-lg font-bold text-gray-900">Phase 3: The Throne & Money Machines (Financial)</h3>
+                    <p class="text-sm text-gray-600 mb-4">Treat businesses as "deployable code modules." They must be isolated in `03_money_machines`.</p>
+
+                     <div class="terminal-block">
+                        <div class="comment"># Inside 03_money_machines, create separate folders for projects</div>
+                        <div class="cmd-prompt">mkdir 03_money_machines/project_alpha</div>
+                        <div class="cmd-prompt">mkdir 03_money_machines/project_beta</div>
+                        <br>
+                        <div class="comment"># Isolate dependencies (Example for JS projects)</div>
+                        <div class="cmd-prompt">cd 03_money_machines/project_alpha && npm init -y</div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2 italic">Note: Each "Money Machine" should be killable without affecting the others.</p>
+                </div>
+
+                 <!-- Phase 4 -->
+                 <div class="relative pl-8">
+                    <div class="absolute -left-[9px] top-0 h-4 w-4 rounded-full bg-gray-300 ring-4 ring-white"></div>
+                    <h3 class="text-lg font-bold text-gray-900">Phase 4: The Break Glass Protocol (Defense)</h3>
+                    <p class="text-sm text-gray-600 mb-4">Implement the encrypted vault logic. This is a local-first web app that encrypts your keys.</p>
+
+                    <div class="bg-white border border-gray-200 p-4 rounded-lg mb-4">
+                        <ul class="list-disc pl-5 space-y-2 text-sm text-gray-700">
+                            <li><strong>Concept:</strong> A React/HTML app that runs offline.</li>
+                            <li><strong>Location:</strong> Source code in `04_defense_systems/vault_app`.</li>
+                            <li><strong>Rule:</strong> Never commit unencrypted secrets to Git. Use `.gitignore`.</li>
+                        </ul>
+                    </div>
+
+                    <div class="terminal-block">
+                        <div class="cmd-prompt">echo "**/*.key" >> .gitignore</div>
+                        <div class="cmd-prompt">echo "**/*.secret" >> .gitignore</div>
+                        <div class="comment"># Setup the vault app</div>
+                        <div class="cmd-prompt">cd 04_defense_systems</div>
+                        <div class="cmd-prompt">npx create-react-app vault-interface</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- VIEW: VAULT (Break Glass) -->
+        <div id="view-vault" class="hidden">
+            <div class="bg-red-50 border-l-4 border-red-600 p-6 mb-8 rounded-r-lg">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 text-red-600 text-2xl mr-4">⚠️</div>
+                    <div>
+                        <h2 class="text-xl font-bold text-red-800">Break Glass Protocol</h2>
+                        <p class="text-red-700 text-sm">Emergency Recovery & Digital Vault Status. <br>This area represents Layer 4 (Defense Systems).</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Vault Inventory (Encrypted)</h3>
+                    <ul class="space-y-3">
+                        <li class="flex justify-between items-center p-3 bg-gray-50 rounded border border-gray-200">
+                            <span class="text-sm font-medium">Master Password List</span>
+                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded font-bold">AES-256</span>
+                        </li>
+                        <li class="flex justify-between items-center p-3 bg-gray-50 rounded border border-gray-200">
+                            <span class="text-sm font-medium">Crypto Seed Phrases</span>
+                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded font-bold">AES-256</span>
+                        </li>
+                        <li class="flex justify-between items-center p-3 bg-gray-50 rounded border border-gray-200">
+                            <span class="text-sm font-medium">Legal Entity Docs</span>
+                            <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-bold">PENDING</span>
+                        </li>
+                        <li class="flex justify-between items-center p-3 bg-gray-50 rounded border border-gray-200">
+                            <span class="text-sm font-medium">Identity Docs (Scans)</span>
+                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded font-bold">AES-256</span>
+                        </li>
+                    </ul>
+                    <button class="mt-6 w-full py-2 border border-gray-300 text-gray-700 font-bold rounded hover:bg-gray-50 transition-colors">MANAGE VAULT CONTENTS</button>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Emergency Triggers</h3>
+                    <p class="text-sm text-gray-600 mb-4">These conditions trigger the release of the "Dead Man's Switch" or manual recovery protocols.</p>
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <div class="h-4 w-4 bg-green-500 rounded-full"></div>
+                            <label class="ml-3 text-sm text-gray-700">Incapacitation Timer (30 days inactivity)</label>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="h-4 w-4 bg-green-500 rounded-full"></div>
+                            <label class="ml-3 text-sm text-gray-700">Duress / Compromise (Panic Button)</label>
+                        </div>
+                    </div>
+                    <div class="mt-8 p-4 bg-gray-900 text-white rounded text-center cursor-pointer hover:bg-black transition-colors">
+                        <span class="font-mono font-bold tracking-widest text-sm">ACCESS RECOVERY INTERFACE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 mt-12 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-xs text-gray-400 font-mono">SOVEREIGN OPERATING SYSTEM // PERSONAL HYBRID ARCHITECTURE</p>
+            <p class="text-xs text-gray-400 mt-2">Design: Modular. Control: Permanent. Exposure: Minimal.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- DATA & STATE ---
+        // Layers of the 5-Layer Stack
+        const layers = [
+            {
+                id: 5,
+                title: "Layer 5: Expansion Systems",
+                subtitle: "Legacy & Continuity",
+                desc: "The mechanisms that ensure the system survives beyond you. This involves teaching others, documentation, and long-term trusts.",
+                rules: ["Aim for century-scale continuity.", "Document everything.", "Build systems that can run without you."]
+            },
+            {
+                id: 4,
+                title: "Layer 4: Defense Systems",
+                subtitle: "Risk & Compliance",
+                desc: "The firewall. This layer monitors for legal, financial, operational, and identity risks. It uses the Defense/Control Agent to flag vulnerabilities.",
+                rules: ["Monitor burnout (Freedom Protocol).", "Audit legal exposure.", "Secure the Vault."]
+            },
+            {
+                id: 3,
+                title: "Layer 3: Money Machines",
+                subtitle: "Operating Entities",
+                desc: "Modular, scalable, and killable businesses. These are NOT you. They are engines you build and deploy. If one fails, the system survives. This is Engine B.",
+                rules: ["Treat entities as modular.", "Automate or delegate.", "Engine B handles the money."]
+            },
+            {
+                id: 2,
+                title: "Layer 2: The Throne",
+                subtitle: "Holding Structure",
+                desc: "The central private entity that owns all IP and assets. Nothing is owned by you personally, nor by the operating companies directly.",
+                rules: ["Own nothing personally.", "Control everything.", "IP stays here, never in the Money Machines."]
+            },
+            {
+                id: 1,
+                title: "Layer 1: Sovereign Core",
+                subtitle: "Vision & Authority",
+                desc: "You, the Architect. The source of vision, decision authority, and creative direction. This layer must be protected from noise and admin tasks.",
+                rules: ["Protect vision authority.", "Remain the Architect, not the Worker.", "Filter all advice."]
+            }
+        ];
+
+        // --- CHART INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('balanceChart').getContext('2d');
+            
+            // Handle label wrapping for chart if needed (though Radar labels are usually short)
+            const splitLabel = (str) => {
+                if (str.length > 16) {
+                    return str.split(' ');
+                }
+                return str;
+            };
+
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Asset Ownership', 'Automation', 'Risk Defense', 'Creative Output', 'Financial Liquidity', 'Privacy'].map(splitLabel),
+                    datasets: [{
+                        label: 'Current System Health',
+                        data: [85, 40, 60, 90, 50, 70],
+                        backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                        borderColor: '#2563EB',
+                        pointBackgroundColor: '#2563EB',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#2563EB'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: '#E5E5E5' },
+                            grid: { color: '#E5E5E5' },
+                            pointLabels: {
+                                font: { size: 11, family: 'Inter', weight: 'bold' },
+                                color: '#4B5563'
+                            },
+                            ticks: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const item = tooltipItems[0];
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    if (Array.isArray(label)) {
+                                        return label.join(' ');
+                                    } else {
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Render Layers for View 2
+            renderLayers();
+            // Default select Layer 1 (bottom) or 5 (top)? Let's select Layer 1 (Core) as default active.
+            selectLayer(4); // Index 4 is Layer 1 in the reversed list logic if needed, but let's see logic below.
+        });
+
+        // --- LOGIC ---
+        function switchTab(tabId) {
+            // Hide all views
+            ['overview', 'architecture', 'agents', 'execution', 'vault'].forEach(id => {
+                document.getElementById(`view-${id}`).classList.add('hidden');
+                document.getElementById(`tab-${id}`).classList.remove('active');
+            });
+
+            // Show selected view
+            const view = document.getElementById(`view-${tabId}`);
+            view.classList.remove('hidden');
+            
+            // Highlight tab
+            const tab = document.getElementById(`tab-${tabId}`);
+            tab.classList.add('active');
+            
+            // Animation reset
+            view.classList.remove('animate-fade-in');
+            void view.offsetWidth; // trigger reflow
+            view.classList.add('animate-fade-in');
+        }
+
+        function renderLayers() {
+            const container = document.getElementById('layer-list');
+            container.innerHTML = '';
+            
+            // Render layers. We want 5 at top, 1 at bottom for the visual stack.
+            [...layers].forEach((layer, index) => {
+                const btn = document.createElement('div');
+                btn.className = `layer-card w-full p-4 bg-white border border-gray-200 rounded cursor-pointer mb-2 relative overflow-hidden`;
+                // Index corresponds to the layers array (0=Layer 5, 4=Layer 1)
+                btn.onclick = () => selectLayer(index);
+                btn.id = `layer-btn-${index}`;
+                
+                // Color coding dots
+                let dotColor = 'bg-gray-300'; // Default
+                
+                btn.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span class="text-xs font-mono text-gray-400 uppercase tracking-widest">Level 0${layer.id}</span>
+                            <h3 class="font-bold text-gray-900">${layer.title.split(': ')[1]}</h3>
+                        </div>
+                        <div class="h-2 w-2 rounded-full ${dotColor} status-dot transition-colors"></div>
+                    </div>
+                `;
+                container.appendChild(btn);
+            });
+        }
+
+        function selectLayer(index) {
+            // UI Updates for Buttons
+            document.querySelectorAll('.layer-card').forEach(b => {
+                b.classList.remove('active', 'border-blue-600');
+                b.querySelector('.status-dot').classList.remove('bg-blue-500');
+                b.querySelector('.status-dot').classList.add('bg-gray-300');
+            });
+            const activeBtn = document.getElementById(`layer-btn-${index}`);
+            if(activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.querySelector('.status-dot').classList.remove('bg-gray-300');
+                activeBtn.querySelector('.status-dot').classList.add('bg-blue-500');
+            }
+
+            // Content Updates for Panel
+            const data = layers[index];
+            const detailPanel = document.getElementById('layer-detail-panel');
+            
+            detailPanel.innerHTML = `
+                <div class="animate-fade-in h-full flex flex-col">
+                    <div class="flex justify-between items-start border-b border-gray-100 pb-4 mb-6">
+                        <div>
+                            <span class="text-xs font-mono text-blue-600 bg-blue-50 px-2 py-1 rounded mb-2 inline-block">LAYER 0${data.id}</span>
+                            <h2 class="text-3xl font-bold text-gray-900">${data.title.split(': ')[1]}</h2>
+                            <p class="text-lg text-gray-500 mt-1">${data.subtitle}</p>
+                        </div>
+                        <div class="text-8xl text-gray-100 font-bold select-none absolute right-6 top-6 opacity-40 -z-10">${data.id}</div>
+                    </div>
+                    
+                    <div class="mb-8 flex-grow">
+                        <h4 class="text-sm font-bold uppercase text-gray-900 tracking-wider mb-2">Operational Function</h4>
+                        <p class="text-gray-700 leading-relaxed text-lg">${data.desc}</p>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-100 mt-auto">
+                        <h4 class="text-sm font-bold uppercase text-gray-900 tracking-wider mb-4 flex items-center">
+                            <span class="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
+                            Core Rules & Directives
+                        </h4>
+                        <ul class="space-y-3">
+                            ${data.rules.map(rule => `
+                                <li class="flex items-start">
+                                    <span class="text-blue-500 mr-2 mt-0.5">►</span>
+                                    <span class="text-gray-700 text-sm font-medium font-mono">${rule}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+    <style>
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</body>
+</html>
