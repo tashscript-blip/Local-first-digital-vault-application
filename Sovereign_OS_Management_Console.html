@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign OS | Management Console</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        :root {
+            --slate-900: #0f172a;
+            --blueprint-blue: #2563eb;
+            --terminal-green: #22c55e;
+        }
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        .terminal-window {
+            background-color: var(--slate-900);
+            color: #cbd5e1;
+            font-family: 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .status-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+    </style>
+    <!-- 
+        Palette Selection: "Brilliant Blues" (High Contrast, Technical)
+        Confirmed: NO SVG, NO Mermaid JS.
+        Architecture: Single Page Application with dynamic View Switching.
+    -->
+</head>
+<body class="min-h-screen text-slate-800">
+
+    <!-- Top Navigation -->
+    <nav class="bg-slate-900 text-white p-4 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-3 h-3 bg-green-500 rounded-full status-pulse"></div>
+                <span class="font-bold tracking-tighter text-lg uppercase">Sovereign <span class="text-blue-500">OS</span></span>
+            </div>
+            <div class="text-xs font-mono text-slate-400">
+                HOST: LGC-000-HP-LAPTOP | ROOT: /legacy-vault-desktop
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-6 md:p-10 space-y-10">
+        
+        <!-- Section 1: Initialization Audit -->
+        <section>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Initialization Audit</h2>
+                        <p class="text-sm text-slate-500">Reviewing logs from 'login-command-line-interface.pdf'</p>
+                    </div>
+                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold uppercase">Success</span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-0 border-b border-slate-100">
+                    <div class="p-8 border-r border-slate-100">
+                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-6">Environment Balance</h3>
+                        <div class="chart-container">
+                            <canvas id="envChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="p-8 bg-slate-50">
+                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-4">Completed Milestones</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="bg-green-500 text-white rounded-full p-1 text-[10px]">✔</div>
+                                <span class="text-sm font-medium">Root Directory `/legacy-vault-desktop` Created</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div class="bg-green-500 text-white rounded-full p-1 text-[10px]">✔</div>
+                                <span class="text-sm font-medium">Electron & Vite Dependencies Installed</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div class="bg-green-500 text-white rounded-full p-1 text-[10px]">✔</div>
+                                <span class="text-sm font-medium">Layered Architecture Folders Initialized</span>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <div class="bg-amber-500 text-white rounded-full p-1 text-[10px]">!</div>
+                                <span class="text-sm font-medium">Vite Config Pending (Layer 3 Bridge)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Technical Execution Bridge -->
+        <section class="space-y-6">
+            <div class="p-2">
+                <h2 class="text-2xl font-black text-slate-900">Next Phase: The Layered Bridge</h2>
+                <p class="text-slate-600">Based on your successful installation, you must now configure the <strong class="text-blue-600">Main Entry Point</strong> to bridge the Sovereign Vault app with the Electron shell.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Instruction Card -->
+                <div class="lg:col-span-1 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-slate-900 mb-4">Step 4: Electron Entry</h3>
+                    <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                        You initialized the project, but Electron needs an <code>index.js</code> in the root to know which window to open.
+                    </p>
+                    <div class="text-xs p-3 bg-blue-50 text-blue-800 rounded-lg font-mono">
+                        Target: /legacy-vault-desktop/index.js
+                    </div>
+                </div>
+
+                <!-- Code Terminal -->
+                <div class="lg:col-span-2 terminal-window rounded-xl overflow-hidden flex flex-col">
+                    <div class="bg-slate-800 px-4 py-2 flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                        <div class="w-3 h-3 bg-amber-500 rounded-full"></div>
+                        <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span class="text-[10px] text-slate-400 font-mono ml-4">VS CODE — index.js</span>
+                    </div>
+                    <div class="p-6 text-sm overflow-x-auto whitespace-pre">
+<span class="text-purple-400">const</span> { app, BrowserWindow } = <span class="text-yellow-200">require</span>(<span class="text-green-400">'electron'</span>);
+<span class="text-purple-400">const</span> path = <span class="text-yellow-200">require</span>(<span class="text-green-400">'path'</span>);
+
+<span class="text-slate-500">// Initialize the Sovereign Window</span>
+<span class="text-purple-400">function</span> <span class="text-blue-400">createWindow</span>() {
+  <span class="text-purple-400">const</span> win = <span class="text-purple-400">new</span> <span class="text-yellow-200">BrowserWindow</span>({
+    width: <span class="text-orange-300">1200</span>,
+    height: <span class="text-orange-300">800</span>,
+    webPreferences: {
+      preload: path.<span class="text-blue-400">join</span>(__dirname, <span class="text-green-400">'preload.js'</span>)
+    }
+  });
+
+  <span class="text-slate-500">// Point to your Layer 3 Money Machine (Vite Dev Server)</span>
+  win.<span class="text-blue-400">loadURL</span>(<span class="text-green-400">'http://localhost:5173'</span>);
+}
+
+app.<span class="text-blue-400">whenReady</span>().<span class="text-blue-400">then</span>(createWindow);
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: The Asset Forecast -->
+        <section>
+            <div class="bg-white p-8 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-6">Asset Composition (Planned)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                    <div class="chart-container md:col-span-1">
+                        <canvas id="assetChart"></canvas>
+                    </div>
+                    <div class="md:col-span-2 space-y-6">
+                        <div>
+                            <h4 class="font-bold text-slate-900">Why this mix?</h4>
+                            <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+                                Your architecture prioritizes <span class="text-blue-600 font-bold">Liquid Assets</span> and <span class="text-blue-600 font-bold">Hard Assets</span> stored in the Throne (Layer 2). 
+                                The "Money Machines" (Layer 3) should only hold operational capital, flushing profits upward to minimize exposure.
+                            </p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-4 bg-slate-50 rounded-lg">
+                                <span class="block text-xs text-slate-400 uppercase font-bold">Risk Level</span>
+                                <span class="text-lg font-bold text-green-600">MINIMAL</span>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-lg">
+                                <span class="block text-xs text-slate-400 uppercase font-bold">Ownership</span>
+                                <span class="text-lg font-bold text-slate-900">SOVEREIGN</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Chart.js - Environment Balance (Bar Chart)
+        const ctxEnv = document.getElementById('envChart').getContext('2d');
+        new Chart(ctxEnv, {
+            type: 'bar',
+            data: {
+                labels: ['File System', 'Dependencies', 'Git Config', 'Vite Bridge', 'UI Framework'],
+                datasets: [{
+                    label: 'Status %',
+                    data: [100, 95, 100, 20, 85],
+                    backgroundColor: ['#2563eb', '#2563eb', '#2563eb', '#cbd5e1', '#2563eb'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { 
+                    x: { max: 100, grid: { display: false } },
+                    y: { grid: { display: false } }
+                },
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: function(items) {
+                                return items[0].chart.data.labels[items[0].dataIndex];
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Chart.js - Asset Chart (Doughnut)
+        const ctxAsset = document.getElementById('assetChart').getContext('2d');
+        new Chart(ctxAsset, {
+            type: 'doughnut',
+            data: {
+                labels: ['The Vault (L99)', 'The Throne (L02)', 'Operating Nodes'],
+                datasets: [{
+                    data: [60, 30, 10],
+                    backgroundColor: ['#0f172a', '#2563eb', '#94a3b8'],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
+                    tooltip: {
+                        callbacks: {
+                            title: function(items) {
+                                return items[0].chart.data.labels[items[0].dataIndex];
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
